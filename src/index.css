@@ -189,6 +189,8 @@ body {
   stroke-dasharray: 628;
   stroke-dashoffset: 160;
 
+  transition: stroke-dashoffset 1s linear;
+
   filter:
     drop-shadow(0 0 8px rgba(159, 111, 255, 0.65))
     drop-shadow(0 0 16px rgba(159, 111, 255, 0.25));
