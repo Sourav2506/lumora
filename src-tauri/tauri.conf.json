@@ -16,8 +16,8 @@
       {
         "title": "Lumora",
 
-        "width": 390,
-        "height": 540,
+        "width": 320,
+        "height": 420,
 
         "center": true,
 
@@ -28,6 +28,8 @@
         "decorations": false,
 
         "transparent": true,
+        
+        "alwaysOnTop": true,
 
         "shadow": true
       }

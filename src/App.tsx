@@ -50,15 +50,25 @@ function App() {
       <div className="bg-glow glow-blue"></div>
 
       <section className="widget">
+
+        <div
+          className="drag-region"
+          data-tauri-drag-region
+        ></div>
         <div className="reflection reflection-1"></div>
         <div className="reflection reflection-2"></div>
 
         <div className="widget-header">
-          <span className="session-pill">Deep Work</span>
+          <span className="session-pill">
+            Deep Work
+          </span>
         </div>
 
         <div className="ring-wrapper">
-          <svg className="progress-ring" viewBox="0 0 240 240">
+          <svg
+            className="progress-ring"
+            viewBox="0 0 240 240"
+          >
             <circle
               className="ring-track"
               cx="120"
@@ -79,7 +89,9 @@ function App() {
           </svg>
 
           <div className="timer-display">
-            <div className="timer-label">Focus Session</div>
+            <div className="timer-label">
+              Focus Session
+            </div>
 
             <div className="timer-value">
               {String(minutes).padStart(2, "0")}:
