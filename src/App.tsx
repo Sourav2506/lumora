@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { Pause, Play, RotateCcw } from "lucide-react";
-import { getCurrentWindow } from "@tauri-apps/api/window";
+import {
+  getCurrentWindow,
+  PhysicalPosition,
+} from "@tauri-apps/api/window";
+import { load } from "@tauri-apps/plugin-store";
 
 const FOCUS_TIME = 25 * 60;
 const CIRCUMFERENCE = 2 * Math.PI * 100;
@@ -8,6 +12,30 @@ const CIRCUMFERENCE = 2 * Math.PI * 100;
 function App() {
   const [timeLeft, setTimeLeft] = useState(FOCUS_TIME);
   const [isRunning, setIsRunning] = useState(false);
+
+  useEffect(() => {
+    const restorePosition = async () => {
+      try {
+        const store = await load("lumora-settings.json");
+
+        const x = await store.get<number>("window_x");
+        const y = await store.get<number>("window_y");
+
+        if (
+          typeof x === "number" &&
+          typeof y === "number"
+        ) {
+          await getCurrentWindow().setPosition(
+            new PhysicalPosition(x, y)
+        );
+        }
+      } catch (err) {
+        console.error("Restore position failed:", err);
+      }
+    };
+
+    restorePosition();
+  }, []);
 
   useEffect(() => {
     if (!isRunning) return;
@@ -32,9 +60,31 @@ function App() {
   const progress = timeLeft / FOCUS_TIME;
   const dashOffset = CIRCUMFERENCE * (1 - progress);
 
+  const savePosition = async () => {
+    try {
+      const store = await load("lumora-settings.json");
+
+      const position =
+        await getCurrentWindow().outerPosition();
+
+      await store.set("window_x", position.x);
+      await store.set("window_y", position.y);
+
+      await store.save();
+    } catch (err) {
+      console.error("Save position failed:", err);
+    }
+  };
+
   const startDrag = async () => {
     try {
-      await getCurrentWindow().startDragging();
+      const window = getCurrentWindow();
+
+      await window.startDragging();
+
+      setTimeout(() => {
+        savePosition();
+      }, 300);
     } catch (err) {
       console.error("Drag failed:", err);
     }
@@ -63,9 +113,7 @@ function App() {
         onMouseDown={(e) => {
           const target = e.target as HTMLElement;
 
-          if (
-            target.closest("button")
-          ) {
+          if (target.closest("button")) {
             return;
           }
 
