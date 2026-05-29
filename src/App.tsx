@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Pause, Play, RotateCcw } from "lucide-react";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
 const FOCUS_TIME = 25 * 60;
 const CIRCUMFERENCE = 2 * Math.PI * 100;
@@ -31,6 +32,14 @@ function App() {
   const progress = timeLeft / FOCUS_TIME;
   const dashOffset = CIRCUMFERENCE * (1 - progress);
 
+  const startDrag = async () => {
+    try {
+      await getCurrentWindow().startDragging();
+    } catch (err) {
+      console.error("Drag failed:", err);
+    }
+  };
+
   const handleStart = () => {
     setIsRunning(true);
   };
@@ -49,12 +58,20 @@ function App() {
       <div className="bg-glow glow-purple"></div>
       <div className="bg-glow glow-blue"></div>
 
-      <section className="widget">
+      <section
+        className="widget"
+        onMouseDown={(e) => {
+          const target = e.target as HTMLElement;
 
-        <div
-          className="drag-region"
-          data-tauri-drag-region
-        ></div>
+          if (
+            target.closest("button")
+          ) {
+            return;
+          }
+
+          startDrag();
+        }}
+      >
         <div className="reflection reflection-1"></div>
         <div className="reflection reflection-2"></div>
 
