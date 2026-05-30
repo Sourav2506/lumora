@@ -6,22 +6,40 @@ import {
   PhysicalPosition,
 } from "@tauri-apps/api/window";
 import { load } from "@tauri-apps/plugin-store";
-import { isPermissionGranted, requestPermission, sendNotification } from "@tauri-apps/plugin-notification";
+import {
+  isPermissionGranted,
+  requestPermission,
+  sendNotification,
+} from "@tauri-apps/plugin-notification";
 
 const FOCUS_TIME = 25 * 60;
+const BREAK_TIME = 5 * 60;
 const CIRCUMFERENCE = 2 * Math.PI * 100;
 
+type SessionType = "focus" | "break";
+
 function App() {
-  const [timeLeft, setTimeLeft] = useState(FOCUS_TIME);
-  const [isRunning, setIsRunning] = useState(false);
+  const [sessionType, setSessionType] =
+    useState<SessionType>("focus");
+
+  const [timeLeft, setTimeLeft] =
+    useState(FOCUS_TIME);
+
+  const [isRunning, setIsRunning] =
+    useState(false);
 
   useEffect(() => {
     const restorePosition = async () => {
       try {
-        const store = await load("lumora-settings.json");
+        const store = await load(
+          "lumora-settings.json"
+        );
 
-        const x = await store.get<number>("window_x");
-        const y = await store.get<number>("window_y");
+        const x =
+          await store.get<number>("window_x");
+
+        const y =
+          await store.get<number>("window_y");
 
         if (
           typeof x === "number" &&
@@ -32,7 +50,10 @@ function App() {
           );
         }
       } catch (err) {
-        console.error("Restore position failed:", err);
+        console.error(
+          "Restore position failed:",
+          err
+        );
       }
     };
 
@@ -40,14 +61,19 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const requestNotificationAccess = async () => {
-      let permissionGranted = await isPermissionGranted();
+    const requestNotificationAccess =
+      async () => {
+        let permissionGranted =
+          await isPermissionGranted();
 
-      if (!permissionGranted) {
-        const permission = await requestPermission();
-        permissionGranted = permission === "granted";
-      }
-    };
+        if (!permissionGranted) {
+          const permission =
+            await requestPermission();
+
+          permissionGranted =
+            permission === "granted";
+        }
+      };
 
     requestNotificationAccess();
   }, []);
@@ -60,18 +86,36 @@ function App() {
         if (prev <= 1) {
           setIsRunning(false);
 
+          const completedFocus =
+            sessionType === "focus";
+
           sendNotification({
-            title: "Focus Session Complete",
-            body: "Great work! Time for a break."
+            title: completedFocus
+              ? "Focus Session Complete"
+              : "Break Complete",
+
+            body: completedFocus
+              ? "Break session is ready."
+              : "Focus session is ready.",
           });
 
           try {
-            const audio = new Audio(ghostSound);
+            const audio = new Audio(
+              ghostSound
+            );
 
             audio.volume = 0.5;
             audio.play();
           } catch (err) {
             console.error(err);
+          }
+
+          if (completedFocus) {
+            setSessionType("break");
+            setTimeLeft(BREAK_TIME);
+          } else {
+            setSessionType("focus");
+            setTimeLeft(FOCUS_TIME);
           }
 
           return 0;
@@ -82,33 +126,53 @@ function App() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isRunning]);
+  }, [isRunning, sessionType]);
 
   const minutes = Math.floor(timeLeft / 60);
+
   const seconds = timeLeft % 60;
 
-  const progress = timeLeft / FOCUS_TIME;
-  const dashOffset = CIRCUMFERENCE * (1 - progress);
+  const progress =
+    timeLeft /
+    (sessionType === "focus"
+      ? FOCUS_TIME
+      : BREAK_TIME);
+
+  const dashOffset =
+    CIRCUMFERENCE * (1 - progress);
 
   const savePosition = async () => {
     try {
-      const store = await load("lumora-settings.json");
+      const store = await load(
+        "lumora-settings.json"
+      );
 
       const position =
         await getCurrentWindow().outerPosition();
 
-      await store.set("window_x", position.x);
-      await store.set("window_y", position.y);
+      await store.set(
+        "window_x",
+        position.x
+      );
+
+      await store.set(
+        "window_y",
+        position.y
+      );
 
       await store.save();
     } catch (err) {
-      console.error("Save position failed:", err);
+      console.error(
+        "Save position failed:",
+        err
+      );
     }
   };
 
   const startDrag = async () => {
     try {
-      const window = getCurrentWindow();
+      const window =
+        getCurrentWindow();
 
       await window.startDragging();
 
@@ -116,7 +180,22 @@ function App() {
         savePosition();
       }, 300);
     } catch (err) {
-      console.error("Drag failed:", err);
+      console.error(
+        "Drag failed:",
+        err
+      );
+    }
+  };
+
+  const switchSession = () => {
+    setIsRunning(false);
+
+    if (sessionType === "focus") {
+      setSessionType("break");
+      setTimeLeft(BREAK_TIME);
+    } else {
+      setSessionType("focus");
+      setTimeLeft(FOCUS_TIME);
     }
   };
 
@@ -130,7 +209,12 @@ function App() {
 
   const handleReset = () => {
     setIsRunning(false);
-    setTimeLeft(FOCUS_TIME);
+
+    setTimeLeft(
+      sessionType === "focus"
+        ? FOCUS_TIME
+        : BREAK_TIME
+    );
   };
 
   return (
@@ -141,9 +225,12 @@ function App() {
       <section
         className="widget"
         onMouseDown={(e) => {
-          const target = e.target as HTMLElement;
+          const target =
+            e.target as HTMLElement;
 
-          if (target.closest("button")) {
+          if (
+            target.closest("button")
+          ) {
             return;
           }
 
@@ -154,9 +241,14 @@ function App() {
         <div className="reflection reflection-2"></div>
 
         <div className="widget-header">
-          <span className="session-pill">
-            Deep Work
-          </span>
+          <button
+            className="session-pill"
+            onClick={switchSession}
+          >
+            {sessionType === "focus"
+              ? "Deep Work"
+              : "Break Time"}
+          </button>
         </div>
 
         <div className="ring-wrapper">
@@ -177,20 +269,32 @@ function App() {
               cy="120"
               r="100"
               style={{
-                strokeDasharray: CIRCUMFERENCE,
-                strokeDashoffset: dashOffset,
+                strokeDasharray:
+                  CIRCUMFERENCE,
+                strokeDashoffset:
+                  dashOffset,
               }}
             />
           </svg>
 
           <div className="timer-display">
             <div className="timer-label">
-              Focus Session
+              {sessionType ===
+              "focus"
+                ? "Deep Work Ready"
+                : "Break Ready"}
             </div>
 
             <div className="timer-value">
-              {String(minutes).padStart(2, "0")}:
-              {String(seconds).padStart(2, "0")}
+              {String(minutes).padStart(
+                2,
+                "0"
+              )}
+              :
+              {String(seconds).padStart(
+                2,
+                "0"
+              )}
             </div>
           </div>
         </div>
