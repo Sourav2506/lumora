@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Pause, Play, RotateCcw } from "lucide-react";
+import ghostSound from "./assets/Ghost Laughing.mp3";
 import {
   getCurrentWindow,
   PhysicalPosition,
@@ -7,7 +8,7 @@ import {
 import { load } from "@tauri-apps/plugin-store";
 import { isPermissionGranted, requestPermission, sendNotification } from "@tauri-apps/plugin-notification";
 
-const FOCUS_TIME = 10;
+const FOCUS_TIME = 25 * 60;
 const CIRCUMFERENCE = 2 * Math.PI * 100;
 
 function App() {
@@ -65,9 +66,7 @@ function App() {
           });
 
           try {
-            const audio = new Audio(
-              "https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg"
-            );
+            const audio = new Audio(ghostSound);
 
             audio.volume = 0.5;
             audio.play();
