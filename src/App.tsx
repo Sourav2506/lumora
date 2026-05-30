@@ -14,9 +14,14 @@ import {
 
 const FOCUS_TIME = 25 * 60;
 const BREAK_TIME = 5 * 60;
+const LONG_BREAK_TIME = 15 * 60;
+
 const CIRCUMFERENCE = 2 * Math.PI * 100;
 
-type SessionType = "focus" | "break";
+type SessionType =
+  | "focus"
+  | "break"
+  | "longBreak";
 
 function App() {
   const [sessionType, setSessionType] =
@@ -27,6 +32,9 @@ function App() {
 
   const [isRunning, setIsRunning] =
     useState(false);
+
+  const [completedFocusSessions, setCompletedFocusSessions] =
+    useState(0);
 
   useEffect(() => {
     const restorePosition = async () => {
@@ -86,19 +94,6 @@ function App() {
         if (prev <= 1) {
           setIsRunning(false);
 
-          const completedFocus =
-            sessionType === "focus";
-
-          sendNotification({
-            title: completedFocus
-              ? "Focus Session Complete"
-              : "Break Complete",
-
-            body: completedFocus
-              ? "Break session is ready."
-              : "Focus session is ready.",
-          });
-
           try {
             const audio = new Audio(
               ghostSound
@@ -110,12 +105,61 @@ function App() {
             console.error(err);
           }
 
-          if (completedFocus) {
-            setSessionType("break");
-            setTimeLeft(BREAK_TIME);
+          if (sessionType === "focus") {
+            const nextCount =
+              completedFocusSessions + 1;
+
+            setCompletedFocusSessions(
+              nextCount
+            );
+
+            const isLongBreak =
+              nextCount % 4 === 0;
+
+            sendNotification({
+              title:
+                "Focus Session Complete",
+              body: isLongBreak
+                ? "Long break is ready."
+                : "Break session is ready.",
+            });
+
+            if (isLongBreak) {
+              setSessionType(
+                "longBreak"
+              );
+
+              setTimeLeft(
+                LONG_BREAK_TIME
+              );
+            } else {
+              setSessionType(
+                "break"
+              );
+
+              setTimeLeft(
+                BREAK_TIME
+              );
+            }
           } else {
-            setSessionType("focus");
-            setTimeLeft(FOCUS_TIME);
+            sendNotification({
+              title:
+                sessionType ===
+                "longBreak"
+                  ? "Long Break Complete"
+                  : "Break Complete",
+
+              body:
+                "Focus session is ready.",
+            });
+
+            setSessionType(
+              "focus"
+            );
+
+            setTimeLeft(
+              FOCUS_TIME
+            );
           }
 
           return 0;
@@ -126,20 +170,31 @@ function App() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isRunning, sessionType]);
+  }, [
+    isRunning,
+    sessionType,
+    completedFocusSessions,
+  ]);
 
-  const minutes = Math.floor(timeLeft / 60);
+  const minutes = Math.floor(
+    timeLeft / 60
+  );
 
   const seconds = timeLeft % 60;
 
-  const progress =
-    timeLeft /
-    (sessionType === "focus"
+  const maxTime =
+    sessionType === "focus"
       ? FOCUS_TIME
-      : BREAK_TIME);
+      : sessionType === "break"
+      ? BREAK_TIME
+      : LONG_BREAK_TIME;
+
+  const progress =
+    timeLeft / maxTime;
 
   const dashOffset =
-    CIRCUMFERENCE * (1 - progress);
+    CIRCUMFERENCE *
+    (1 - progress);
 
   const savePosition = async () => {
     try {
@@ -190,12 +245,24 @@ function App() {
   const switchSession = () => {
     setIsRunning(false);
 
-    if (sessionType === "focus") {
-      setSessionType("break");
-      setTimeLeft(BREAK_TIME);
+    if (
+      sessionType === "focus"
+    ) {
+      setSessionType(
+        "break"
+      );
+
+      setTimeLeft(
+        BREAK_TIME
+      );
     } else {
-      setSessionType("focus");
-      setTimeLeft(FOCUS_TIME);
+      setSessionType(
+        "focus"
+      );
+
+      setTimeLeft(
+        FOCUS_TIME
+      );
     }
   };
 
@@ -210,11 +277,23 @@ function App() {
   const handleReset = () => {
     setIsRunning(false);
 
-    setTimeLeft(
+    if (
       sessionType === "focus"
-        ? FOCUS_TIME
-        : BREAK_TIME
-    );
+    ) {
+      setTimeLeft(
+        FOCUS_TIME
+      );
+    } else if (
+      sessionType === "break"
+    ) {
+      setTimeLeft(
+        BREAK_TIME
+      );
+    } else {
+      setTimeLeft(
+        LONG_BREAK_TIME
+      );
+    }
   };
 
   return (
@@ -229,7 +308,9 @@ function App() {
             e.target as HTMLElement;
 
           if (
-            target.closest("button")
+            target.closest(
+              "button"
+            )
           ) {
             return;
           }
@@ -243,11 +324,17 @@ function App() {
         <div className="widget-header">
           <button
             className="session-pill"
-            onClick={switchSession}
+            onClick={
+              switchSession
+            }
           >
-            {sessionType === "focus"
+            {sessionType ===
+            "focus"
               ? "Deep Work"
-              : "Break Time"}
+              : sessionType ===
+                "break"
+              ? "Break Time"
+              : "Long Break"}
           </button>
         </div>
 
@@ -281,17 +368,24 @@ function App() {
             <div className="timer-label">
               {sessionType ===
               "focus"
-                ? "Deep Work Ready"
-                : "Break Ready"}
+                ? "Focus Session"
+                : sessionType ===
+                  "break"
+                ? "Break Session"
+                : "Long Break"}
             </div>
 
             <div className="timer-value">
-              {String(minutes).padStart(
+              {String(
+                minutes
+              ).padStart(
                 2,
                 "0"
               )}
               :
-              {String(seconds).padStart(
+              {String(
+                seconds
+              ).padStart(
                 2,
                 "0"
               )}
@@ -302,23 +396,31 @@ function App() {
         <div className="controls">
           <button
             className="glass-btn primary"
-            onClick={handleStart}
+            onClick={
+              handleStart
+            }
           >
             <Play size={18} />
           </button>
 
           <button
             className="glass-btn"
-            onClick={handlePause}
+            onClick={
+              handlePause
+            }
           >
             <Pause size={18} />
           </button>
 
           <button
             className="glass-btn"
-            onClick={handleReset}
+            onClick={
+              handleReset
+            }
           >
-            <RotateCcw size={18} />
+            <RotateCcw
+              size={18}
+            />
           </button>
         </div>
       </section>
