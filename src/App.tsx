@@ -5,8 +5,9 @@ import {
   PhysicalPosition,
 } from "@tauri-apps/api/window";
 import { load } from "@tauri-apps/plugin-store";
+import { isPermissionGranted, requestPermission, sendNotification } from "@tauri-apps/plugin-notification";
 
-const FOCUS_TIME = 25 * 60;
+const FOCUS_TIME = 10;
 const CIRCUMFERENCE = 2 * Math.PI * 100;
 
 function App() {
@@ -27,7 +28,7 @@ function App() {
         ) {
           await getCurrentWindow().setPosition(
             new PhysicalPosition(x, y)
-        );
+          );
         }
       } catch (err) {
         console.error("Restore position failed:", err);
@@ -38,12 +39,42 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const requestNotificationAccess = async () => {
+      let permissionGranted = await isPermissionGranted();
+
+      if (!permissionGranted) {
+        const permission = await requestPermission();
+        permissionGranted = permission === "granted";
+      }
+    };
+
+    requestNotificationAccess();
+  }, []);
+
+  useEffect(() => {
     if (!isRunning) return;
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           setIsRunning(false);
+
+          sendNotification({
+            title: "Focus Session Complete",
+            body: "Great work! Time for a break."
+          });
+
+          try {
+            const audio = new Audio(
+              "https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg"
+            );
+
+            audio.volume = 0.5;
+            audio.play();
+          } catch (err) {
+            console.error(err);
+          }
+
           return 0;
         }
 

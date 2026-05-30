@@ -23,6 +23,8 @@
 
     "core:window:allow-center",
 
-    "store:default"
+    "store:default",
+
+    "notification:default"
   ]
 }
