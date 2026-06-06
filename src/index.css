@@ -289,3 +289,19 @@ body {
     inset 0 -1px 1px rgba(0, 0, 0, 0.2),
     0 0 14px rgba(159, 111, 255, 0.25);
 }
+
+
+.stats-line {
+  min-height: 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-top: 6px;
+  margin-bottom: 10px;
+
+  color: rgba(255,255,255,0.65);
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}

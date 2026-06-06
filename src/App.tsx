@@ -279,6 +279,20 @@ function App() {
 
   const seconds = timeLeft % 60;
 
+  const focusMinutesToday =
+    Math.floor(
+      focusSecondsToday / 60
+    );
+
+  const statsText =
+    sessionsToday === 0
+      ? "Ready to Focus"
+      : `${sessionsToday} ${
+          sessionsToday === 1
+            ? "Session"
+            : "Sessions"
+        } • ${focusMinutesToday}m Today`;
+
   const maxTime =
     sessionType === "focus"
       ? FOCUS_TIME
@@ -536,6 +550,10 @@ const saveStats = async (
           </div>
         </div>
 
+        <div className="stats-line">
+          {statsText} 
+        </div>
+
         <div className="controls">
           <button
             className="glass-btn primary"
@@ -566,6 +584,7 @@ const saveStats = async (
             />
           </button>
         </div>
+
       </section>
     </main>
   );
