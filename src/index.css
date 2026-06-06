@@ -185,8 +185,8 @@ body {
   transition: stroke-dashoffset 1s linear;
 
   filter:
-    drop-shadow(0 0 8px rgba(159, 111, 255, 0.65))
-    drop-shadow(0 0 14px rgba(159, 111, 255, 0.25));
+    drop-shadow(0 0 8px var(--accent))
+    drop-shadow(0 0 14px var(--accent));
 }
 
 .timer-display {
@@ -421,4 +421,52 @@ body {
   background: rgba(255,255,255,0.08);
 
   color: white;
+}
+
+
+.theme-dropdown {
+  position: relative;
+}
+
+.theme-list {
+  position: absolute;
+
+  top: 28px;
+  left: 0;
+
+  width: 120px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+
+  padding: 6px;
+
+  border-radius: 12px;
+
+  background:
+    rgba(20,20,30,0.95);
+
+  backdrop-filter: blur(20px);
+
+  border:
+    1px solid rgba(
+      255,
+      255,
+      255,
+      0.08
+    );
+
+  z-index: 999;
+}
+
+.theme-list button {
+  width: 100%;
+
+  text-align: left;
+
+  padding: 8px;
+
+  border-radius: 8px;
 }

@@ -53,6 +53,9 @@ function App() {
   const [theme, setTheme] =
     useState("purple");
 
+  const [showThemeMenu, setShowThemeMenu] =
+    useState(false);
+
   useEffect(() => {
     const initializeApp = async () => {
       try {
@@ -524,9 +527,21 @@ function App() {
       <section
         className="widget"
         onClick={() => {
-          if (showSettings){
+          if (showSettings) {
             setShowSettings(false);
           }
+        }}
+        onMouseDown={(e) => {
+          const target =
+            e.target as HTMLElement;
+
+          if (
+            target.closest("button")
+          ) {
+            return;
+          }
+
+          startDrag();
         }}
       >
         <div className="reflection reflection-1"></div>
@@ -540,17 +555,94 @@ function App() {
             e.stopPropagation()
           }
         >
-          <button>
-            Theme ▼
-          </button>
+          <div className="theme-dropdown">
 
-          <button>
-            Reset Stats
-          </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
 
-          <button>
-            About
-          </button>
+                setShowThemeMenu(
+                  !showThemeMenu
+                );
+              }}
+            >
+              Theme ▼
+            </button>
+
+            {showThemeMenu && (
+              <div
+                className="theme-list"
+                onClick={(e) =>
+                  e.stopPropagation()
+                }
+              >
+                <button
+                  onClick={() => {
+                    handleThemeChange(
+                      "purple"
+                    );
+
+                    setShowThemeMenu(
+                      false
+                    );
+                  }}
+                >
+                  Purple
+                </button>
+
+                <button
+                  onClick={() => {
+                    handleThemeChange(
+                      "blue"
+                    );
+
+                    setShowThemeMenu(
+                      false
+                    );
+                  }}
+                >
+                  Blue
+                </button>
+
+                  <button
+                    onClick={() => {
+                      handleThemeChange(
+                        "green"
+                      );
+
+                      setShowThemeMenu(
+                        false
+                      );
+                    }}
+                  >
+                    Green
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      handleThemeChange(
+                        "mono"
+                      );
+
+                      setShowThemeMenu(
+                        false
+                      );
+                    }}
+                  >
+                    Monochrome
+                  </button>
+                </div>
+              )}
+
+            </div>
+
+            <button>
+              Reset Stats
+            </button>
+
+            <button>
+              About
+            </button>
         </div>
       )}
 
