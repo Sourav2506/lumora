@@ -15,6 +15,7 @@ import {
 const FOCUS_TIME = 25 * 60;
 const BREAK_TIME = 5 * 60;
 const LONG_BREAK_TIME = 15 * 60;
+const INACTIVITY_RESET_HOURS = 5;
 
 const CIRCUMFERENCE = 2 * Math.PI * 100;
 
@@ -36,8 +37,14 @@ function App() {
   const [completedFocusSessions, setCompletedFocusSessions] =
     useState(0);
 
+  const [sessionsToday, setSessionsToday] =
+    useState(0);
+
+  const [focusSecondsToday, setFocusSecondsToday] =
+    useState(0);
+
   useEffect(() => {
-    const restorePosition = async () => {
+    const initializeApp = async () => {
       try {
         const store = await load(
           "lumora-settings.json"
@@ -57,15 +64,83 @@ function App() {
             new PhysicalPosition(x, y)
           );
         }
+
+        const storedSessions =
+          (await store.get<number>(
+            "sessions_today"
+          )) ?? 0;
+
+        const storedFocusSeconds =
+          (await store.get<number>(
+            "focus_seconds_today"
+          )) ?? 0;
+
+        const lastActivity =
+          (await store.get<number>(
+            "last_activity_timestamp"
+          )) ?? Date.now();
+
+        const now = Date.now();
+
+        const inactivityHours =
+          (now - lastActivity) /
+          (1000 * 60 * 60);
+
+        const lastDate =
+          new Date(lastActivity)
+            .toDateString();
+
+        const currentDate =
+          new Date(now)
+            .toDateString();
+
+        if (
+          lastDate !== currentDate &&
+          inactivityHours >
+            INACTIVITY_RESET_HOURS
+        ) {
+          await store.set(
+            "sessions_yesterday",
+            storedSessions
+          );
+
+          await store.set(
+            "focus_seconds_yesterday",
+            storedFocusSeconds
+          );
+
+          await store.set(
+            "sessions_today",
+            0
+          );
+
+          await store.set(
+            "focus_seconds_today",
+            0
+          );
+
+          await store.save();
+
+          setSessionsToday(0);
+          setFocusSecondsToday(0);
+        } else {
+          setSessionsToday(
+            storedSessions
+          );
+
+          setFocusSecondsToday(
+            storedFocusSeconds
+          );
+        }
       } catch (err) {
         console.error(
-          "Restore position failed:",
+          "Initialization failed:",
           err
         );
       }
     };
 
-    restorePosition();
+    initializeApp();
   }, []);
 
   useEffect(() => {
@@ -111,6 +186,26 @@ function App() {
 
             setCompletedFocusSessions(
               nextCount
+            );
+
+            const updatedSessions =
+              sessionsToday + 1;
+
+            const updatedSeconds =
+              focusSecondsToday +
+              FOCUS_TIME;
+
+            setSessionsToday(
+              updatedSessions
+            );
+
+            setFocusSecondsToday(
+              updatedSeconds
+            );
+
+            saveStats(
+              updatedSessions,
+              updatedSeconds
             );
 
             const isLongBreak =
@@ -174,6 +269,8 @@ function App() {
     isRunning,
     sessionType,
     completedFocusSessions,
+    sessionsToday,
+    focusSecondsToday,
   ]);
 
   const minutes = Math.floor(
@@ -224,6 +321,39 @@ function App() {
     }
   };
 
+const saveStats = async (
+    sessions: number,
+    seconds: number
+  ) => {
+    try {
+      const store = await load(
+        "lumora-settings.json"
+      );
+
+      await store.set(
+        "sessions_today",
+        sessions
+      );
+
+      await store.set(
+        "focus_seconds_today",
+        seconds
+      );
+
+      await store.set(
+        "last_activity_timestamp",
+        Date.now()
+      );
+
+      await store.save();
+    } catch (err) {
+      console.error(
+        "Save stats failed:",
+        err
+      );
+    }
+  };
+
   const startDrag = async () => {
     try {
       const window =
@@ -266,7 +396,20 @@ function App() {
     }
   };
 
-  const handleStart = () => {
+  const handleStart = async () => {
+    try {
+      const store = await load(
+        "lumora-settings.json"
+      );
+
+      await store.set(
+        "last_activity_timestamp",
+        Date.now()
+      );
+
+      await store.save();
+    } catch {}
+
     setIsRunning(true);
   };
 
