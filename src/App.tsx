@@ -55,6 +55,11 @@ function App() {
 
   const [showThemeMenu, setShowThemeMenu] =
     useState(false);
+  
+  const dragStartRef =
+    useRef<{ x: number; y: number } | null>(
+      null
+    );
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -535,15 +540,44 @@ function App() {
           const target =
             e.target as HTMLElement;
 
-          if (
-            target.closest("button")
-          ) {
-            return;
-          }
+            if (
+              target.closest("button")
+            ) {
+              return;
+            }
 
-          startDrag();
-        }}
-      >
+            dragStartRef.current = {
+              x: e.clientX,
+              y: e.clientY,
+            };
+          }}
+          onMouseMove={(e) => {
+            if (!dragStartRef.current) {
+              return;
+            }
+
+            const dx = Math.abs(
+              e.clientX -
+                dragStartRef.current.x
+            );
+
+            const dy = Math.abs(
+              e.clientY -
+                dragStartRef.current.y
+            );
+
+            if (dx > 5 || dy > 5) {
+              dragStartRef.current =
+                null;
+
+              startDrag();
+            }
+          }}
+          onMouseUp={() => {
+            dragStartRef.current =
+              null;
+          }}
+        >
         <div className="reflection reflection-1"></div>
         <div className="reflection reflection-2"></div>
 
