@@ -157,13 +157,15 @@ function App() {
 
           setTheme(storedTheme);
         }
-      } catch (err) {
+        setTheme(storedTheme);
+      }catch (err) {
         console.error(
           "Initialization failed:",
           err
         );
       }
     };
+    
 
     initializeApp();
   }, []);
