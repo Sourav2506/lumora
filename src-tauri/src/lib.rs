@@ -29,7 +29,13 @@ pub fn run() {
 
             let _tray =
                 TrayIconBuilder::new()
+                    .icon(app.default_window_icon().unwrap().clone())
                     .menu(&menu)
+                    .on_menu_event(|app, event| {
+                        if event.id().as_ref() == "quit" {
+                            app.exit(0);
+                        }
+                    })
                     .build(app)?;
             
             if cfg!(debug_assertions) {
