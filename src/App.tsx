@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Pause, Play, RotateCcw, Settings, } from "lucide-react";
 import ghostSound from "./assets/Ghost Laughing.mp3";
 import {
@@ -47,6 +47,12 @@ function App() {
   const [showSettings, setShowSettings] =
     useState(false);
 
+  const settingsRef =
+    useRef<HTMLDivElement>(null);
+    
+  const [theme, setTheme] =
+    useState("purple");
+
   useEffect(() => {
     const initializeApp = async () => {
       try {
@@ -68,6 +74,11 @@ function App() {
             new PhysicalPosition(x, y)
           );
         }
+
+        const storedTheme =
+          (await store.get<string>(
+            "theme"
+          ))  ?? "purple";
 
         const storedSessions =
           (await store.get<number>(
@@ -135,6 +146,8 @@ function App() {
           setFocusSecondsToday(
             storedFocusSeconds
           );
+
+          setTheme(storedTheme);
         }
       } catch (err) {
         console.error(
@@ -146,6 +159,8 @@ function App() {
 
     initializeApp();
   }, []);
+
+
 
   useEffect(() => {
     const requestNotificationAccess =
@@ -211,6 +226,8 @@ function App() {
               updatedSessions,
               updatedSeconds
             );
+
+            
 
             const isLongBreak =
               nextCount % 4 === 0;
@@ -339,7 +356,7 @@ function App() {
     }
   };
 
-const saveStats = async (
+  const saveStats = async (
     sessions: number,
     seconds: number
   ) => {
@@ -370,6 +387,36 @@ const saveStats = async (
         err
       );
     }
+  };
+
+  const saveTheme = async (
+    selectedTheme: string
+  ) => {
+    try {
+      const store = await load(
+        "lumora-settings.json"
+      );
+
+      await store.set(
+        "theme",
+        selectedTheme
+      );
+
+      await store.save();
+    } catch (err) {
+      console.error(
+        "Save theme failed:",
+        err
+      );
+    }
+  };
+
+  const handleThemeChange = (
+    selectedTheme: string
+  ) => {
+    setTheme(selectedTheme);
+
+    saveTheme(selectedTheme);
   };
 
   const startDrag = async () => {
@@ -458,32 +505,41 @@ const saveStats = async (
   };
 
   return (
-    <main className="lumora-app">
+    <main 
+      className="lumora-app"
+      style={{
+        ["--accent" as any]:
+          theme === "purple"
+            ? "#9f6fff"
+            : theme === "blue"
+            ? "#4da6ff"
+            : theme === "green"
+            ? "#43d17a"
+            : "#d0d0d0"
+      }}
+    >
       <div className="bg-glow glow-purple"></div>
       <div className="bg-glow glow-blue"></div>
 
       <section
         className="widget"
-        onMouseDown={(e) => {
-          const target =
-            e.target as HTMLElement;
-
-          if (
-            target.closest(
-              "button"
-            )
-          ) {
-            return;
+        onClick={() => {
+          if (showSettings){
+            setShowSettings(false);
           }
-
-          startDrag();
         }}
       >
         <div className="reflection reflection-1"></div>
         <div className="reflection reflection-2"></div>
 
       {showSettings && (
-        <div className="settings-menu">
+        <div 
+          ref={settingsRef} 
+          className="settings-menu"
+          onClick={(e) =>
+            e.stopPropagation()
+          }
+        >
           <button>
             Theme ▼
           </button>
@@ -505,9 +561,12 @@ const saveStats = async (
 
           <button
             className= "settings-btn"
-            onClick={() =>
-              setShowSettings(!showSettings)  
-            }
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowSettings(
+                !showSettings
+              );  
+            }}
             >
              <Settings size={16} /> 
             </button>
@@ -527,7 +586,13 @@ const saveStats = async (
           </button>
         </div>
 
-        <div className="ring-wrapper">
+        <div 
+          className="ring-wrapper"
+          onClick={() =>{
+            if (showSettings){
+              setShowSettings(false);
+            }
+          }}>
           <svg
             className="progress-ring"
             viewBox="0 0 240 240"
@@ -582,11 +647,25 @@ const saveStats = async (
           </div>
         </div>
 
-        <div className="stats-line">
+        <div
+          className="stats-line"
+          onClick={() => {
+            if (showSettings) {
+              setShowSettings(false);
+            }
+          }}
+        >
           {statsText} 
         </div>
 
-        <div className="controls">
+        <div
+          className="controls"
+          onClick={() => {
+            if (showSettings) {
+              setShowSettings(false);
+            }
+          }}
+        >
           <button
             className="glass-btn primary"
             onClick={
