@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Pause, Play, RotateCcw } from "lucide-react";
+import { Pause, Play, RotateCcw, Settings, } from "lucide-react";
 import ghostSound from "./assets/Ghost Laughing.mp3";
 import {
   getCurrentWindow,
@@ -11,6 +11,7 @@ import {
   requestPermission,
   sendNotification,
 } from "@tauri-apps/plugin-notification";
+
 
 const FOCUS_TIME = 25 * 60;
 const BREAK_TIME = 5 * 60;
@@ -42,6 +43,9 @@ function App() {
 
   const [focusSecondsToday, setFocusSecondsToday] =
     useState(0);
+
+  const [showSettings, setShowSettings] =
+    useState(false);
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -478,7 +482,35 @@ const saveStats = async (
         <div className="reflection reflection-1"></div>
         <div className="reflection reflection-2"></div>
 
+      {showSettings && (
+        <div className="settings-menu">
+          <button>
+            Theme ▼
+          </button>
+
+          <button>
+            Reset Stats
+          </button>
+
+          <button>
+            About
+          </button>
+        </div>
+      )}
+
+      <>
+        
+
         <div className="widget-header">
+
+          <button
+            className= "settings-btn"
+            onClick={() =>
+              setShowSettings(!showSettings)  
+            }
+            >
+             <Settings size={16} /> 
+            </button>
           <button
             className="session-pill"
             onClick={
@@ -584,7 +616,8 @@ const saveStats = async (
             />
           </button>
         </div>
-
+        </>
+      
       </section>
     </main>
   );
