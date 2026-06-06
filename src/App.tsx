@@ -55,7 +55,11 @@ function App() {
 
   const [showThemeMenu, setShowThemeMenu] =
     useState(false);
-  
+  const [showAboutModal, setShowAboutModal] =
+    useState(false);
+
+  const [showResetModal, setShowResetModal] =
+    useState(false);
   const dragStartRef =
     useRef<{ x: number; y: number } | null>(
       null
@@ -514,6 +518,36 @@ function App() {
     }
   };
 
+  const handleResetStats = async () => {
+    try {
+      const store = await load(
+        "lumora-settings.json"
+      );
+
+      await store.set(
+        "sessions_today",
+        0
+      );
+
+      await store.set(
+        "focus_seconds_today",
+        0
+      );
+
+      await store.save();
+
+      setSessionsToday(0);
+      setFocusSecondsToday(0);
+
+      setShowSettings(false);
+    } catch (err) {
+      console.error(
+        "Reset stats failed:",
+        err
+      );
+    }
+  };
+
   return (
     <main 
       className="lumora-app"
@@ -672,11 +706,21 @@ function App() {
 
             </div>
 
-            <button>
+            <button
+              className="settings-danger"
+              onClick={() => {
+                setShowResetModal(true);
+              }}
+            >
               Reset Stats
             </button>
 
-            <button>
+            <button
+              className="settings-info"
+              onClick={() => {
+                setShowAboutModal(true);
+              }}
+            >
               About
             </button>
         </div>
@@ -824,7 +868,73 @@ function App() {
           </button>
         </div>
         </>
-      
+      {showResetModal && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+
+            <h3>Reset Statistics</h3>
+
+            <p>
+              Reset today's sessions
+              and focus time?
+            </p>
+
+            <div className="modal-actions">
+
+              <button
+                className="modal-btn"
+                onClick={() =>
+                  setShowResetModal(false)
+                }
+              >
+                Cancel
+              </button>
+
+              <button
+                className="modal-btn danger"
+                onClick={() => {
+                  handleResetStats();
+                  setShowResetModal(false);
+                }}
+              >
+                Reset
+              </button>
+
+            </div>
+          </div>
+        </div>
+      )}
+
+        {showAboutModal && (
+          <div className="modal-overlay">
+            <div className="modal-card">
+
+              <h3>Lumora</h3>
+
+              <p>
+                Version 1.0
+              </p>
+
+              <p>
+                Minimal focus widget
+                built with Tauri.
+              </p>
+
+              <div className="modal-actions">
+
+                <button
+                  className="modal-btn"
+                  onClick={() =>
+                    setShowAboutModal(false)
+                  }
+                >
+                  Close
+                </button>
+
+              </div>
+            </div>
+            </div>
+        )}
       </section>
     </main>
   );

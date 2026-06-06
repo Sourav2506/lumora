@@ -417,6 +417,19 @@ body {
   transition: all 0.2s ease;
 }
 
+.settings-danger {
+  color: #ff8a8a;
+}
+
+.settings-danger:hover {
+  background: rgba(
+    255,
+    80,
+    80,
+    0.12
+  );
+}
+
 .settings-menu button:hover {
   background: rgba(255,255,255,0.08);
 
@@ -469,4 +482,91 @@ body {
   padding: 8px;
 
   border-radius: 8px;
+}
+
+.settings-info {
+  color: rgba(
+    255,
+    255,
+    255,
+    0.85
+  );
+}
+
+
+.modal-overlay {
+  position: absolute;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    rgba(0,0,0,0.35);
+
+  backdrop-filter: blur(8px);
+
+  z-index: 5000;
+}
+
+.modal-card {
+  width: 260px;
+
+  padding: 18px;
+
+  border-radius: 18px;
+
+  background:
+    rgba(25,25,35,0.95);
+
+  border:
+    1px solid rgba(
+      255,
+      255,
+      255,
+      0.08
+    );
+
+  text-align: center;
+}
+
+.modal-card h3 {
+  margin-bottom: 12px;
+}
+
+.modal-card p {
+  margin-bottom: 10px;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      0.75
+    );
+}
+
+.modal-actions {
+  display: flex;
+
+  justify-content: center;
+
+  gap: 10px;
+
+  margin-top: 14px;
+}
+
+.modal-btn {
+  border: none;
+
+  padding: 8px 14px;
+
+  border-radius: 10px;
+
+  cursor: pointer;
+}
+
+.modal-btn.danger {
+  color: #ff8a8a;
 }
