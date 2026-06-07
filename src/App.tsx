@@ -11,6 +11,11 @@ import {
   requestPermission,
   sendNotification,
 } from "@tauri-apps/plugin-notification";
+import {
+  enable,
+  disable,
+  isEnabled,
+} from "@tauri-apps/plugin-autostart";
 
 
 const FOCUS_TIME = 25 * 60;
@@ -60,6 +65,9 @@ function App() {
 
   const [showResetModal, setShowResetModal] =
     useState(false);
+
+  const [launchOnStartup, setLaunchOnStartup] =
+    useState(false);
   const dragStartRef =
     useRef<{ x: number; y: number } | null>(
       null
@@ -91,6 +99,20 @@ function App() {
           (await store.get<string>(
             "theme"
           ))  ?? "purple";
+
+        try {
+          const enabled =
+            await isEnabled();
+
+          setLaunchOnStartup(
+            enabled
+          );
+        } catch (err) {
+          console.error(
+            "Autostart check failed:",
+            err
+          );
+        }
 
         const storedSessions =
           (await store.get<number>(
@@ -159,7 +181,6 @@ function App() {
             storedFocusSeconds
           );
 
-          setTheme(storedTheme);
         }
         setTheme(storedTheme);
       }catch (err) {
@@ -420,6 +441,38 @@ function App() {
     } catch (err) {
       console.error(
         "Save theme failed:",
+        err
+      );
+    }
+  };
+
+  const saveLaunchOnStartup = async (
+    enabled: boolean
+  ) => {
+    try {
+      if (enabled) {
+        await enable();
+      } else {
+        await disable();
+      }
+
+      const store = await load(
+        "lumora-settings.json"
+      );
+
+      await store.set(
+        "launch_on_startup",
+        enabled
+      );
+
+      await store.save();
+
+      setLaunchOnStartup(
+        enabled
+      );
+    } catch (err) {
+      console.error(
+        "Autostart update failed:",
         err
       );
     }
@@ -705,6 +758,18 @@ function App() {
               )}
 
             </div>
+            
+            <button
+              onClick={() => {
+                saveLaunchOnStartup(
+                  !launchOnStartup
+                );
+              }}
+            >
+              {launchOnStartup
+                ? "✓ Startup"
+                : "Startup"}
+            </button>
 
             <button
               className="settings-danger"
