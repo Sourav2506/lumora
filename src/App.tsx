@@ -1,6 +1,9 @@
 import { useEffect, useState, useRef } from "react";
 import { Pause, Play, RotateCcw, Settings, } from "lucide-react";
-import ghostSound from "./assets/Ghost Laughing.mp3";
+import whaleSound from "./assets/Whale.mp3";
+import deepSound from "./assets/174_Hz.mp3";
+import focusSound from "./assets/528_Hz.mp3";
+import silentSound from "./assets/Silence.mp3";
 import {
   getCurrentWindow,
   PhysicalPosition,
@@ -58,8 +61,15 @@ function App() {
   const [theme, setTheme] =
     useState("purple");
 
-  const [showThemeMenu, setShowThemeMenu] =
-    useState(false);
+  const [sound, setSound] =
+    useState("whale");
+  const [activeDropdown, setActiveDropdown] =
+    useState<
+      "theme" |
+      "sound" |
+      null
+    >(null);
+
   const [showAboutModal, setShowAboutModal] =
     useState(false);
 
@@ -99,6 +109,11 @@ function App() {
           (await store.get<string>(
             "theme"
           ))  ?? "purple";
+
+        const storedSound =
+          (await store.get<string>(
+            "sound"
+          )) ?? "whale";
 
         try {
           const enabled =
@@ -183,6 +198,7 @@ function App() {
 
         }
         setTheme(storedTheme);
+        setSound(storedSound);
       }catch (err) {
         console.error(
           "Initialization failed:",
@@ -224,12 +240,25 @@ function App() {
           setIsRunning(false);
 
           try {
-            const audio = new Audio(
-              ghostSound
-            );
+            const selectedSound =
+              sound === "whale"
+              ? whaleSound
+              : sound === "174"
+              ? deepSound
+              : sound === "528"
+              ? focusSound
+              : silentSound;
 
-            audio.volume = 0.5;
-            audio.play();
+            if (sound !== "silent") {
+              const audio =
+                new Audio(
+                  selectedSound
+                );
+
+              audio.volume = 0.5;
+
+              audio.play();
+            }
           } catch (err) {
             console.error(err);
           }
@@ -327,6 +356,7 @@ function App() {
     completedFocusSessions,
     sessionsToday,
     focusSecondsToday,
+    sound
   ]);
 
   const minutes = Math.floor(
@@ -446,6 +476,28 @@ function App() {
     }
   };
 
+  const saveSound = async (
+    selectedSound: string
+  ) => {
+    try {
+      const store = await load(
+        "lumora-settings.json"
+      );
+
+      await store.set(
+        "sound",
+        selectedSound
+      );
+
+      await store.save();
+    } catch (err) {
+      console.error(
+        "Save sound failed:",
+        err
+      );
+    }
+  };
+
   const saveLaunchOnStartup = async (
     enabled: boolean
   ) => {
@@ -484,6 +536,14 @@ function App() {
     setTheme(selectedTheme);
 
     saveTheme(selectedTheme);
+  };
+
+  const handleSoundChange = (
+    selectedSound: string
+  ) => {
+    setSound(selectedSound);
+
+    saveSound(selectedSound);
   };
 
   const startDrag = async () => {
@@ -623,6 +683,7 @@ function App() {
         onClick={() => {
           if (showSettings) {
             setShowSettings(false);
+            setActiveDropdown(null);
           }
         }}
         onMouseDown={(e) => {
@@ -678,122 +739,150 @@ function App() {
             e.stopPropagation()
           }
         >
-          <div className="theme-dropdown">
+          <div className="settings-top-row">
 
+            
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-
-                setShowThemeMenu(
-                  !showThemeMenu
-                );
-              }}
+              onClick={() =>
+                setActiveDropdown(
+                  activeDropdown === "theme"
+                    ? null
+                    : "theme"
+                )
+              }
             >
               Theme ▼
             </button>
 
-            {showThemeMenu && (
-              <div
-                className="theme-list"
-                onClick={(e) =>
-                  e.stopPropagation()
-                }
-              >
-                <button
-                  onClick={() => {
-                    handleThemeChange(
-                      "purple"
-                    );
 
-                    setShowThemeMenu(
-                      false
-                    );
-                  }}
-                >
-                  Purple
+            <button
+              onClick={() =>
+                setActiveDropdown(
+                  activeDropdown === "sound"
+                    ? null
+                    : "sound"
+                )
+              }
+            >
+              Sound: {sound} ▼
+            </button>
+            
+
+
+          </div>
+
+          <div className="settings-dropdown-area">
+
+            {(
+              activeDropdown === "theme"
+            ) && (
+              <>
+                <button onClick={() => {
+                  handleThemeChange("purple");
+                  setActiveDropdown(null);
+
+                }}>
+                  Purple  
                 </button>
 
-                <button
-                  onClick={() => {
-                    handleThemeChange(
-                      "blue"
-                    );
-
-                    setShowThemeMenu(
-                      false
-                    );
-                  }}
-                >
+                <button onClick={() => {
+                  handleThemeChange("blue");
+                  setActiveDropdown(null);
+                }}>
                   Blue
                 </button>
 
-                  <button
-                    onClick={() => {
-                      handleThemeChange(
-                        "green"
-                      );
+                <button onClick={() => {
+                  handleThemeChange("green");
+                  setActiveDropdown(null);
+                }}>
+                  Green
+                </button>
 
-                      setShowThemeMenu(
-                        false
-                      );
-                    }}
-                  >
-                    Green
-                  </button>
+                <button onClick={() => {
+                  handleThemeChange("mono");
+                  setActiveDropdown(null);
+                }}>
+                  Monochrome
+                </button>
+              </>
+            )}
 
-                  <button
-                    onClick={() => {
-                      handleThemeChange(
-                        "mono"
-                      );
+            {(
+              activeDropdown === "sound"
+            )&& (
+              <>
+                <button onClick={() => {
+                  handleSoundChange("whale");
+                  setActiveDropdown(null);
+                }}>
+                  Whale Song
+                </button>
 
-                      setShowThemeMenu(
-                        false
-                      );
-                    }}
-                  >
-                    Monochrome
-                  </button>
-                </div>
-              )}
+                <button onClick={() => {
+                  handleSoundChange("174");
+                  setActiveDropdown(null);
+                }}>
+                  Deep Frequency
+                </button>
 
-            </div>
-            
+                <button onClick={() => {
+                  handleSoundChange("528");
+                  setActiveDropdown(null);
+                }}>
+                  Focus Frequency
+                </button>
+
+                <button onClick={() => {
+                  handleSoundChange("silent");
+                  setActiveDropdown(null);
+                }}>
+                  Silent
+                </button>
+              </>
+            )}
+
+          </div>
+
+          <div className="settings-bottom-row">
+
             <button
-              onClick={() => {
-                saveLaunchOnStartup(
+              onClick={() =>
+                saveLaunchOnStartup(  
                   !launchOnStartup
-                );
-              }}
+                )
+              }
             >
-              {launchOnStartup
+              {launchOnStartup  
                 ? "✓ Startup"
                 : "Startup"}
             </button>
 
             <button
               className="settings-danger"
-              onClick={() => {
-                setShowResetModal(true);
-              }}
+              onClick={() =>
+                setShowResetModal(true)
+              }
             >
               Reset Stats
             </button>
 
             <button
               className="settings-info"
-              onClick={() => {
-                setShowAboutModal(true);
-              }}
+              onClick={() =>
+                setShowAboutModal(true) 
+              }
             >
               About
             </button>
+
+          </div>
         </div>
       )}
-
-      <>
         
+      
 
+      
         <div className="widget-header">
 
           <button
@@ -932,7 +1021,8 @@ function App() {
             />
           </button>
         </div>
-        </>
+      
+
       {showResetModal && (
         <div className="modal-overlay">
           <div className="modal-card">

@@ -367,32 +367,54 @@ body {
 .settings-menu {
   position: absolute;
 
-  top: 6px;
-  left: 41px;
+  top: 8px;
+  left: 42px;
 
-  height: 28px;
+  min-width: 220px;
 
   display: flex;
-  align-items: center;
+  flex-direction: column;
 
-  gap: 4px;
+  gap: 8px;
 
-  padding: 4px 8px;
+  padding: 10px;
 
   z-index: 50;
 
-  background:
-    linear-gradient(
-      135deg,
-      rgba(255,255,255,0.12),
-      rgba(255,255,255,0.04)
-    );
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,0.12),
+    rgba(255,255,255,0.04)
+  );
 
   backdrop-filter: blur(20px);
 
   border: 1px solid rgba(255,255,255,0.08);
 
-  border-radius: 14px;
+  border-radius: 16px;
+}
+
+.settings-top-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.settings-dropdown-area {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-dropdown-area button {
+  text-align: left;
+  padding: 6px 10px;
+}
+
+.settings-bottom-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
 }
 
 .settings-menu button {
@@ -436,43 +458,6 @@ body {
   color: white;
 }
 
-
-.theme-dropdown {
-  position: relative;
-}
-
-.theme-list {
-  position: absolute;
-
-  top: 28px;
-  left: 0;
-
-  width: 120px;
-
-  display: flex;
-  flex-direction: column;
-
-  gap: 4px;
-
-  padding: 6px;
-
-  border-radius: 12px;
-
-  background:
-    rgba(20,20,30,0.95);
-
-  backdrop-filter: blur(20px);
-
-  border:
-    1px solid rgba(
-      255,
-      255,
-      255,
-      0.08
-    );
-
-  z-index: 999;
-}
 
 .theme-list button {
   width: 100%;
