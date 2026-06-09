@@ -834,7 +834,7 @@ function App() {
                 </button>
 
                 <button onClick={() => {
-                  handleSoundChange("silent");
+                  handleSoundChange("Silent");
                   setActiveDropdown(null);
                 }}>
                   Silent
