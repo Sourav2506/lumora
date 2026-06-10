@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Lumora",
-  "version": "0.1.0",
+  "productName": "PERGE",
+  "version": "1.0.0",
   "identifier": "com.lumora.widget",
 
   "build": {
@@ -16,7 +16,7 @@
       {
         "label": "main",
         
-        "title": "Lumora",
+        "title": "PERGE",
 
         "width": 280,
         "height": 360,

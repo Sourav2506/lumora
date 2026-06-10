@@ -87,7 +87,7 @@ function App() {
     const initializeApp = async () => {
       try {
         const store = await load(
-          "lumora-settings.json"
+          "perge-settings.json"
         );
 
         const x =
@@ -396,7 +396,7 @@ function App() {
   const savePosition = async () => {
     try {
       const store = await load(
-        "lumora-settings.json"
+        "perge-settings.json"
       );
 
       const position =
@@ -427,7 +427,7 @@ function App() {
   ) => {
     try {
       const store = await load(
-        "lumora-settings.json"
+        "perge-settings.json"
       );
 
       await store.set(
@@ -459,7 +459,7 @@ function App() {
   ) => {
     try {
       const store = await load(
-        "lumora-settings.json"
+        "perge-settings.json"
       );
 
       await store.set(
@@ -481,7 +481,7 @@ function App() {
   ) => {
     try {
       const store = await load(
-        "lumora-settings.json"
+        "perge-settings.json"
       );
 
       await store.set(
@@ -509,7 +509,7 @@ function App() {
       }
 
       const store = await load(
-        "lumora-settings.json"
+        "perge-settings.json"
       );
 
       await store.set(
@@ -591,7 +591,7 @@ function App() {
   const handleStart = async () => {
     try {
       const store = await load(
-        "lumora-settings.json"
+        "perge-settings.json"
       );
 
       await store.set(
@@ -634,7 +634,7 @@ function App() {
   const handleResetStats = async () => {
     try {
       const store = await load(
-        "lumora-settings.json"
+        "perge-settings.json"
       );
 
       await store.set(
@@ -663,7 +663,7 @@ function App() {
 
   return (
     <main 
-      className="lumora-app"
+      className="perge-app"
       style={{
         ["--accent" as any]:
           theme === "purple"
@@ -1064,7 +1064,7 @@ function App() {
           <div className="modal-overlay">
             <div className="modal-card">
 
-              <h3>Lumora</h3>
+              <h3>PERGE</h3>
 
               <p>
                 Version 1.0
@@ -1072,7 +1072,7 @@ function App() {
 
               <p>
                 Minimal focus widget
-                built with Tauri.
+                built for deep work.
               </p>
 
               <div className="modal-actions">

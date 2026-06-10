@@ -19,7 +19,7 @@ pub fn run() {
             let show = MenuItem::with_id(
                 app,
                 "show",
-                "Show Lumora",
+                "Show PERGE",
                 true,
                 None::<&str>,
             )?;
