@@ -2,7 +2,7 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "PERGE",
   "version": "1.0.0",
-  "identifier": "com.lumora.widget",
+  "identifier": "com.perge.widget",
 
   "build": {
     "frontendDist": "../dist",
